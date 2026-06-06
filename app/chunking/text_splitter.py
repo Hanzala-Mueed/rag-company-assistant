@@ -1,4 +1,4 @@
-from langchain_text_splitters import (RecursiveCharacterTextSplitter)
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 from app.config.settings import (CHUNK_SIZE, CHUNK_OVERLAP,)
 
