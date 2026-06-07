@@ -1,9 +1,12 @@
 from app.rag.rag_pipeline import RAGPipeline
 
-# from app.llm.huggingface_llm import HuggingFaceLLM
 from app.llm.ollama_llm import OllamaLLM
 
 from app.utils.logger import get_logger
+
+from app.retrieval.query_builder import (
+    build_combined_query
+)
 
 logger = get_logger(__name__)
 
@@ -13,10 +16,6 @@ class ChatService:
     def __init__(self):
 
         self.rag = RAGPipeline()
-
-        # self.llm = HuggingFaceLLM(
-        #     api_key=HF_API_KEY
-        # )
         self.llm = OllamaLLM()
 
     @staticmethod
@@ -38,12 +37,31 @@ class ChatService:
         question: str,
         history: list[dict]
     ):
+        
+        logger.info(
+            f"Current question: {question}"
+        )
 
+        logger.info(
+            f"History messages: {len(history)}"
+        )
+
+
+        # combined_query = (
+        #     self.combine_questions(
+        #         question,
+        #         history
+        #     )
+        # )
         combined_query = (
-            self.combine_questions(
+            build_combined_query(
                 question,
                 history
             )
+        )
+
+        logger.info(
+            f"Combined query:\n{combined_query}"
         )
 
         docs, context = (
@@ -51,6 +69,10 @@ class ChatService:
                 combined_query
             )
         )
+        logger.info(
+            f"Retrieved {len(docs)} documents"
+        )
+
 
         system_prompt = (
             self.rag.build_system_prompt(
@@ -77,5 +99,9 @@ class ChatService:
         answer = (
             self.llm.generate(messages)
         )
+        logger.info(
+            "Response generated successfully"
+        )
+
 
         return answer, docs
