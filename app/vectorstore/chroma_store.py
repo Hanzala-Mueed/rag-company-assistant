@@ -79,3 +79,14 @@ class ChromaStore:
             "documents": data["documents"],
             "metadatas": data["metadatas"]
         }
+    
+
+    def load_vectorstore(self):
+
+        return Chroma(
+            persist_directory=str(
+                VECTOR_DB_DIR
+            ),
+            embedding_function=self.embeddings,
+            collection_name=COLLECTION_NAME
+        )
