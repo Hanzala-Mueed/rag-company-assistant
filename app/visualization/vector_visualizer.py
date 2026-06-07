@@ -42,6 +42,19 @@ class VectorVisualizer:
         vectors, documents, metadata = (
             self.get_embeddings()
         )
+        colors = {
+            "company": "blue",
+            "employees": "green",
+            "products": "red",
+            "contracts": "orange",
+        }
+        marker_colors = [
+            colors.get(
+                item.get("doc_type", ""),
+                "gray"
+            )
+            for item in metadata
+        ]
 
         tsne = TSNE(
             n_components=2,
@@ -57,10 +70,21 @@ class VectorVisualizer:
                     y=reduced[:, 1],
                     mode="markers",
                     text=[
-                        doc[:100]
-                        for doc in documents
+                        f"""
+                        Type: {meta.get('doc_type')}
+                        <br>
+                        {doc[:100]}
+                        """
+                        for doc, meta in zip(
+                            documents,
+                            metadata
+                        )
                     ],
-                    hoverinfo="text"
+                    hoverinfo="text",
+                    marker=dict(
+                        size=8,
+                        color=marker_colors
+                    )
                 )
             ]
         )
@@ -76,6 +100,19 @@ class VectorVisualizer:
         vectors, documents, metadata = (
             self.get_embeddings()
         )
+        colors = {
+            "company": "blue",
+            "employees": "green",
+            "products": "red",
+            "contracts": "orange",
+        }
+        marker_colors = [
+            colors.get(
+                item.get("doc_type", ""),
+                "gray"
+            )
+            for item in metadata
+        ]
 
         tsne = TSNE(
             n_components=3,
@@ -92,10 +129,21 @@ class VectorVisualizer:
                     z=reduced[:, 2],
                     mode="markers",
                     text=[
-                        doc[:100]
-                        for doc in documents
+                        f"""
+                        Type: {meta.get('doc_type')}
+                        <br>
+                        {doc[:100]}
+                        """
+                        for doc, meta in zip(
+                            documents,
+                            metadata
+                        )
                     ],
-                    hoverinfo="text"
+                    hoverinfo="text",
+                    marker=dict(
+                        size=5,
+                        color=marker_colors
+                    )
                 )
             ]
         )
