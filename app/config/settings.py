@@ -11,6 +11,9 @@ LOG_DIR = BASE_DIR / "logs"
 # Embedding model
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 
+# ollama configuration
+OLLAMA_MODEL = "llama3.2"
+
 # Chunking configuration
 CHUNK_SIZE = 500
 CHUNK_OVERLAP = 200
@@ -23,3 +26,4 @@ COLLECTION_NAME = "company_documents"
 
 # Visualization
 TSNE_RANDOM_STATE = 42
+
