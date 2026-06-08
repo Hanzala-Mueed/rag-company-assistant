@@ -47,12 +47,6 @@ class ChatService:
         )
 
 
-        # combined_query = (
-        #     self.combine_questions(
-        #         question,
-        #         history
-        #     )
-        # )
         combined_query = (
             build_combined_query(
                 question,
@@ -102,6 +96,7 @@ class ChatService:
         logger.info(
             "Response generated successfully"
         )
+
 
 
         return answer, docs
