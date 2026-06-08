@@ -1,6 +1,6 @@
 from langchain_ollama import ChatOllama
-
 from app.utils.logger import get_logger
+import json
 
 logger = get_logger(__name__)
 
@@ -16,12 +16,15 @@ class OllamaLLM:
             temperature=0
         )
 
-        logger.info(
-            f"Ollama model loaded: {self.model_name}"
-        )
+        logger.info(f"Ollama model loaded: {self.model_name}")
+
 
     def generate(self, messages: list) -> str:
 
         response = self.llm.invoke(messages)
-
         return response.content
+
+    def generate_json(self, messages: list):
+
+        response = self.generate(messages)
+        return json.loads(response)

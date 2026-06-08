@@ -15,9 +15,9 @@ TEST_CASES = [
     TestCase(
         question="Who founded the company?",
         category="company",
-        reference_answer="The company was founded by John Smith.",
+        reference_answer="The company was founded by Avery Lancaster.",
         keywords=[
-            "John Smith",
+            "Avery Lancaster",
             "founder"
         ]
     ),
@@ -35,10 +35,11 @@ TEST_CASES = [
     TestCase(
         question="What employee benefits are available?",
         category="employees",
-        reference_answer="Employees receive benefits.",
+        reference_answer="Employees receive benefits like health insurance, PTO, Professional development programs and mentorship, Clear career progression paths.",
         keywords=[
             "benefits",
-            "employees"
+            "employees",
+            "insurance",
         ]
     ),
 
