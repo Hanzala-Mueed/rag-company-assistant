@@ -18,6 +18,11 @@ class ChatService:
         self.rag = RAGPipeline()
         self.llm = OllamaLLM()
 
+        # Store latest chat session data
+        self.last_question = ""
+        self.last_answer = ""
+        self.last_docs = []
+
     @staticmethod
     def combine_questions(
         question: str,
@@ -93,10 +98,16 @@ class ChatService:
         answer = (
             self.llm.generate(messages)
         )
+
+        self.last_question = question
+        self.last_answer = answer
+        self.last_docs = docs
+
         logger.info(
             "Response generated successfully"
         )
 
-
-
         return answer, docs
+    
+
+chat_services = ChatService()

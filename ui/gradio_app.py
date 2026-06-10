@@ -1,18 +1,23 @@
 import gradio as gr
 import pandas as pd
 
-from app.services.chat_service import ChatService
+from app.services.chat_service import chat_services
 
 from app.visualization.vector_visualizer import (
     VectorVisualizer,
 )
 
-from app.evaluation.evaluator import (
-    evaluate_all_retrieval,
-)
+# from app.evaluation.evaluator import (
+#     evaluate_all_retrieval,
+# )
+
+# from app.evaluation.evaluator import (
+#     evaluate_all_answers,
+# )
 
 from app.evaluation.evaluator import (
-    evaluate_all_answers,
+    evaluate_live_answer,
+    evaluate_live_retrieval
 )
 
 from app.vectorstore.chroma_store import (
@@ -23,8 +28,6 @@ from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-
-chat_service = ChatService()
 visualizer = VectorVisualizer()
 store = ChromaStore()
 
@@ -37,7 +40,7 @@ def chat_response(message, history):
 
     history = history or []
 
-    answer, docs = chat_service.answer(
+    answer, docs = chat_services.answer(
         question=message,
         history=history
     )
@@ -97,26 +100,123 @@ def load_3d_plot():
 # RETRIEVAL EVALUATION
 # =====================================================
 
-def run_retrieval_eval():
 
-    results = evaluate_all_retrieval()
+# def run_retrieval_eval(
+#     keyword_text
+# ):
 
-    df = pd.DataFrame(results)
+#     keywords = [
+#         x.strip()
+#         for x in keyword_text.split(",")
+#         if x.strip()
+#     ]
 
-    return df
+#     result = evaluate_live_retrieval(
+#         keywords
+#     )
+
+#     return pd.DataFrame(
+#         [result]
+#     )
+
+def run_retrieval_eval(keyword_text):
+
+    keywords = [
+        x.strip()
+        for x in keyword_text.split(",")
+        if x.strip()
+    ]
+
+    result = evaluate_live_retrieval(
+        keywords
+    )
+
+    mrr = result["MRR"]
+    ndcg = result["NDCG"]
+    coverage = result["Keyword Coverage"]
+
+    explanation = []
+
+    # MRR
+    if mrr == 1:
+        explanation.append(
+            "✅ MRR = 1.0\n\n"
+            "The first retrieved chunk already contained the expected keyword."
+        )
+    elif mrr >= 0.5:
+        explanation.append(
+            f"⚠️ MRR = {mrr:.2f}\n\n"
+            "Relevant information was retrieved but not ranked first."
+        )
+    else:
+        explanation.append(
+            f"❌ MRR = {mrr:.2f}\n\n"
+            "Relevant chunks appeared too low in ranking."
+        )
+
+    # nDCG
+    if ndcg >= 0.9:
+        explanation.append(
+            f"✅ nDCG = {ndcg:.4f}\n\n"
+            "Relevant chunks were ranked very well."
+        )
+    elif ndcg >= 0.7:
+        explanation.append(
+            f"⚠️ nDCG = {ndcg:.4f}\n\n"
+            "Ranking quality is acceptable but can be improved."
+        )
+    else:
+        explanation.append(
+            f"❌ nDCG = {ndcg:.4f}\n\n"
+            "Ranking quality is poor."
+        )
+
+    # Coverage
+    if coverage == 100:
+        explanation.append(
+            "✅ Keyword Coverage = 100%\n\n"
+            "All expected keywords were found."
+        )
+    elif coverage >= 50:
+        explanation.append(
+            f"⚠️ Keyword Coverage = {coverage:.1f}%\n\n"
+            "Some expected keywords were found."
+        )
+    else:
+        explanation.append(
+            f"❌ Keyword Coverage = {coverage:.1f}%\n\n"
+            "Most expected keywords were missing."
+        )
+
+    return (
+        pd.DataFrame([result]),
+        "\n\n---\n\n".join(explanation)
+    )
 
 
 # =====================================================
 # ANSWER EVALUATION
 # =====================================================
 
-def run_answer_eval():
+# def run_answer_eval():
 
-    results = evaluate_all_answers()
+#     results = evaluate_all_answers()
 
-    df = pd.DataFrame(results)
+#     df = pd.DataFrame(results)
 
-    return df
+#     return df
+
+def run_answer_eval(
+    reference_answer
+):
+
+    result = evaluate_live_answer(
+        reference_answer
+    )
+
+    return pd.DataFrame(
+        [result]
+    )
 
 
 # =====================================================
@@ -323,15 +423,23 @@ with gr.Blocks(
 
         with gr.Tab("🔍 Retrieval Evaluation"):
 
+            keyword_box = gr.Textbox(
+                label="Expected Keywords",
+                placeholder="founder, company, Avery Lancaster"
+            )
+
             retrieval_btn = gr.Button(
-                "Run Retrieval Evaluation"
+                "Evaluate Retrieval"
             )
 
             retrieval_df = gr.Dataframe()
 
+            retrieval_explanation = gr.Markdown()
+
             retrieval_btn.click(
                 fn=run_retrieval_eval,
-                outputs=retrieval_df
+                inputs=keyword_box,
+                outputs=[retrieval_df, retrieval_explanation]
             )
 
         # =============================================
@@ -340,14 +448,32 @@ with gr.Blocks(
 
         with gr.Tab("📝 Answer Evaluation"):
 
+            # answer_btn = gr.Button(
+            #     "Run Answer Evaluation"
+            # )
+
+            # answer_df = gr.Dataframe()
+
+            # answer_btn.click(
+            #     fn=run_answer_eval,
+            #     outputs=answer_df
+            # )
+
+            reference_answer = gr.Textbox(
+                label="Reference Answer",
+                lines=5,
+                placeholder="Paste expected answer here..."
+            )
+
             answer_btn = gr.Button(
-                "Run Answer Evaluation"
+                "Evaluate Last Chat Response"
             )
 
             answer_df = gr.Dataframe()
 
             answer_btn.click(
                 fn=run_answer_eval,
+                inputs=reference_answer,
                 outputs=answer_df
             )
 
