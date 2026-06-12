@@ -278,6 +278,8 @@ def calculate_semantic_similarity(
 
 
     return float(similarity)
+
+    
 def evaluate_live_answer(
     reference_answer: str
 ):
